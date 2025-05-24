@@ -1,117 +1,87 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
-    [SerializeField] private Camera goCamera;
-
     private CharacterController controller;
     private Animations animationsScript;
 
+    public LayerMask groundLayer;
+    public Transform groundCheck;
+    public float groundCheckRadius = 0.3f;
+
+    public float verticalSpeed = 0f;
     public bool isGrounded = false;
 
-    public float verticalSpeed = 0f,
-                        mouseX = 0f,
-                        mouseY = 0f,
-                        currentAngleX = 0f;
+    public const float gravityScale = 20f;
+    public const float speedScale = 5f;
+    public const float jumpForce = 8f;
 
-    public const float gravityScale = 9.8f,
-                        speedScale = 5f,
-                        jumpForce = 8f,
-                        turnSpeed = 90f;
-
-    private void MoveCharacter()
-    {
-    isGrounded = controller.isGrounded;
-    // Get input for horizontal and vertical movement
-    Vector3 velocity = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
-    if(Input.GetKey(KeyCode.W))
-    {
-        animationsScript.WalkAnimation(true);
-    }
-    else
-    {
-        animationsScript.WalkAnimation(false);
-    }
-
-    // Transform the input direction to world space and apply speed
-    velocity = transform.TransformDirection(velocity) * speedScale;
-
-    // Check if the character is grounded
-    if (controller.isGrounded)
-    {
-        // Reset vertical speed when grounded
-        verticalSpeed = 0f;
-
-        // Check if the jump button is pressed
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            // Apply jump force
-            verticalSpeed = jumpForce;
-            animationsScript.JumpAnimation();
-        }
-    }
-
-    // Apply gravity
-    verticalSpeed -= gravityScale * Time.deltaTime;
-
-    // Set the vertical component of the velocity
-    velocity.y = verticalSpeed;
-
-    // Move the character using the character controller
-    controller.Move(velocity * Time.deltaTime);
-}
-
-    // Start is called before the first frame update
     void Start()
     {
         controller = GetComponent<CharacterController>();
         animationsScript = GameObject.Find("AnimationLibrary_Unity_Standard").GetComponent<Animations>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        MoveCharacter();
+        HandleMovement();
         ReloadGun();
         Interact();
         Aim();
     }
 
-    private void ReloadGun()
+    void HandleMovement()
     {
-        if(Input.GetKeyDown(KeyCode.R))
+        // Manual ground check
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
+
+        Vector3 input = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
+
+        if (input.magnitude > 0.1f)
+            animationsScript.WalkAnimation(true);
+        else
+            animationsScript.WalkAnimation(false);
+
+        Vector3 move = transform.TransformDirection(input) * speedScale;
+
+        if (isGrounded)
         {
+            if (verticalSpeed < 0f)
+                verticalSpeed = -2f; // Keeps grounded better
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                verticalSpeed = jumpForce;
+                animationsScript.JumpAnimation();
+            }
+        }
+
+        // Apply gravity
+        verticalSpeed -= gravityScale * Time.deltaTime;
+        move.y = verticalSpeed;
+
+        controller.Move(move * Time.deltaTime);
+    }
+
+    void ReloadGun()
+    {
+        if (Input.GetKeyDown(KeyCode.R))
             animationsScript.ReloadAnimation();
-        }
     }
 
-    private void Interact()
+    void Interact()
     {
-        if(Input.GetKeyDown(KeyCode.E))
-        {
+        if (Input.GetKeyDown(KeyCode.E))
             animationsScript.InteractAnimation();
-        }
     }
 
-    private void Grabbing()
+    void Aim()
     {
-        if(Input.GetKeyDown(KeyCode.F))
-        {
-            animationsScript.GrabbingAnimation();
-        }
-    }
-
-    private void Aim()
-    {
-        if(Input.GetMouseButton(1))
+        if (Input.GetMouseButton(1))
         {
             animationsScript.AimAnimation(true);
-            if(Input.GetMouseButtonDown(0))
-            {
+            if (Input.GetMouseButtonDown(0))
                 animationsScript.ShootAnimation();
-            }
         }
         else
         {
