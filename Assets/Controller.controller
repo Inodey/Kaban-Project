@@ -733,13 +733,13 @@ AnimatorStateMachine:
     m_Position: {x: 480, y: -600, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -8816581871258533558}
-    m_Position: {x: 280, y: -190, z: 0}
+    m_Position: {x: 280, y: 80, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -8381952042312132279}
-    m_Position: {x: 280, y: -120, z: 0}
+    m_Position: {x: 100, y: 200, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 3771430888910120947}
-    m_Position: {x: 280, y: -50, z: 0}
+    m_Position: {x: 470, y: 200, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -2480423891652899945}
     m_Position: {x: 970, y: -280, z: 0}
@@ -824,7 +824,7 @@ AnimatorStateTransition:
 --- !u!1102 &2704199663753966613
 AnimatorState:
   serializedVersion: 6
-  m_ObjectHideFlags: 1
+  m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
